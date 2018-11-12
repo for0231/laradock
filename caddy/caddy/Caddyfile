@@ -56,8 +56,9 @@ https://drupal.server.host {
     #}
 }
 
-laradock1.demo:80 {
-    root /var/www/public
+http://full.laradock.demo {
+    root /var/www/public/HTML/full
+    index index.html
     # Create a Webhook in git.
     #git {
 	#repo https://github.com/xxx/xxx
@@ -68,7 +69,19 @@ laradock1.demo:80 {
     #}
 
 }
+http://seed.laradock.demo {
+    root /var/www/public/HTML/seed
+    index index.html
+    # Create a Webhook in git.
+    #git {
+	#repo https://github.com/xxx/xxx
+    #    path /home/xxx
+    #    #interval 60
+    #    hook  webhook laradock
+    #    hook_type   generic
+    #}
 
+}
 laradock2.demo:80 {
     # Create a Proxy and cors.
     #proxy domain.com
