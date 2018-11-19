@@ -4,7 +4,7 @@
 #  redir https://drupal.server.host
 #}
 http://drupal.server.host {
-    root /var/www/drupal/docroot
+    root /var/www/drupal
     fastcgi / php-fpm:9000 php {
         index index.php
     }

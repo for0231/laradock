@@ -65,6 +65,8 @@ RUN apt-get update -yqq && \
 #   - INSTALL_NODE=false
 #   - ...
 #
+
+
 ###########################################################################
 # Set Timezone
 ###########################################################################
@@ -880,91 +882,161 @@ USER root
 
 RUN apt-get update -y && \
     apt-get install -y wget mariadb-client
+
+ENV COMPOSER_PROCESS_TIMEOUT 1200
+######################################################
+# Install Drupal
+######################################################
+RUN git clone -b 8.7.x https://github.com/drupal/drupal.git /var/www/drupal
+
+###########################################################################
+# Add Project ISP
+###########################################################################
+#RUN git clone https://github.com/for0231/isp.git /var/www/drupal/modules/isp
+RUN git clone https://gitee.com/idcp/isp.git /var/www/drupal/modules/isp
+
+WORKDIR /var/www/drupal
+## Use composer china mirror.
+RUN composer config -g repo.packagist composer https://packagist.laravel-china.org && \
+  composer install
+
+###########################################################################
+# Add Project Contribute Modules
+###########################################################################
+
+# Install Drupal modules
+RUN composer require \
+  drupal/address \
+  drupal/ajax_links_api \
+  drupal/block_class \
+  drupal/bootstrap \
+  drupal/bootstrap_barrio \
+  drupal/bootstrap_layouts \
+  drupal/bootstrap_library \
+  drupal/commerce \
+  drupal/commerce_recurring \
+  drupal/commerce_alipay \
+  drupal/commerce_autosku \
+  drupal/commerce_paypal \
+  drupal/conditional_fields \
+  drupal/console \
+  drupal/config_rewrite \
+  drupal/custom_formatters \
+  drush/drush \
+  drupal/drush_language \
+  drupal/ds \
+  drupal/default_content \
+  drupal/devel \
+  drupal/entity_print \
+  drupal/eva \
+  drupal/facets \
+  drupal/features \
+  drupal/field_formatter_class \
+  drupal/field_group \
+  drupal/field_widget_class \
+  drupal/inline_entity_form \
+  drupal/libraries \
+  drupal/login_destination \
+  drupal/migrate_source_csv \
+  drupal/migrate_tools \
+  drupal/page_manager \
+  drupal/panelizer \
+  drupal/panels \
+  drupal/quicktabs \
+  drupal/reference_table_formatter \
+  drupal/rules \
+  drupal/search_api_solr \
+  drupal/superfish \
+  drupal/token \
+  drupal/views_slideshow \
+  kgaut/potx
 # Clean up
 RUN apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
     rm /var/log/lastlog /var/log/faillog
-RUN composer create-project Vardot/varbase-project:^8.6.2 /var/www/drupal --no-dev --no-interaction
-RUN git clone https://gitee.com/idcp/isp.git /var/www/drupal/docroot/modules/isp
 
-WORKDIR /var/www/drupal
-# Install Drupal modules
-RUN composer require \
-#  drupal/address \
-#  drupal/ajax_links_api \
-#  drupal/block_class \
-#  drupal/bootstrap \
-#  drupal/bootstrap_barrio \
-#  drupal/bootstrap_layouts \
-#  drupal/bootstrap_library \
-#  drupal/commerce \
-#  drupal/commerce_recurring \
-#  drupal/commerce_alipay \
-#  drupal/commerce_autosku \
-#  drupal/commerce_paypal \
-#  drupal/conditional_fields \
-  drupal/console \
-#  drupal/config_rewrite \
-#  drupal/custom_formatters \
-  drush/drush \
-#  drupal/drush_language \
-#  drupal/ds \
-#  drupal/default_content \
-#  drupal/devel \
-#  drupal/entity_print \
-#  drupal/eva \
-#  drupal/facets \
-#  drupal/features \
-#  drupal/field_formatter_class \
-#  drupal/field_group \
-#  drupal/field_widget_class \
-#  drupal/inline_entity_form \
-#  drupal/libraries \
-#  drupal/login_destination \
-#  drupal/migrate_source_csv \
-#  drupal/migrate_tools \
-#  drupal/page_manager \
-#  drupal/panelizer \
-#  drupal/panels \
-#  drupal/quicktabs \
-#  drupal/reference_table_formatter \
-#  drupal/rules \
-#  drupal/search_api_solr \
-#  drupal/superfish \
-#  drupal/token \
-#  drupal/views_slideshow \
-  kgaut/potx
+
+# Patch: Allow Tours to be taken by users that cannot access the Toolbar
+# https://www.drupal.org/project/drupal/issues/2069073
+#RUN wget https://www.drupal.org/files/issues/2069073-38.patch && \
+#  git apply 2069073-38.patch && \
+#  rm 2069073-38.patch
+
+# Patch: View output is not used for entityreference options
+# https://www.drupal.org/node/2174633
+#RUN wget https://www.drupal.org/files/issues/2174633-143-entity-reference.patch && \
+#  git apply 2174633-143-entity-reference.patch && \
+#  rm 2174633-143-entity-reference.patch
+
+# Patch: Can't create comments when comment is a base field
+# https://www.drupal.org/project/drupal/issues/2855068
+RUN wget https://www.drupal.org/files/issues/2855068-8_0.patch && \
+  git apply 2855068-8_0.patch && \
+  rm 2855068-8_0.patch
+
+# Patch: Allow updating modules with new service dependencies
+# https://www.drupal.org/project/drupal/issues/2863986
+#RUN wget https://www.drupal.org/files/issues/2863986-2-49.patch && \
+#  git apply 2863986-2-49.patch && \
+#  rm 2863986-2-49.patch
+
+# Patch: Allow blocks to be added to entity displays in Field UI
+# https://www.drupal.org/project/drupal/issues/2878685
+#RUN wget https://www.drupal.org/files/issues/2878685-block-field_ui-36.patch && \
+#  git apply 2878685-block-field_ui-36.patch && \
+#  rm 2878685-block-field_ui-36.patch
+
+# Patch: Enable block contextual link
+# https://www.drupal.org/project/drupal/issues/2940015
+RUN wget https://www.drupal.org/files/issues/2940015-block-contextual-link-2.patch && \
+  git apply 2940015-block-contextual-link-2.patch && \
+  rm 2940015-block-contextual-link-2.patch
+
+# If PHP filter is empty, module should return TRUE and not execute code
+# https://www.drupal.org/project/php/issues/2678430
+#RUN cd modules/contrib/php && \
+#  wget https://www.drupal.org/files/issues/php_condition_check_empty-2678430-13.patch && \
+#  patch -p1 < php_condition_check_empty-2678430-13.patch && \
+#  rm php_condition_check_empty-2678430-13.patch
+
+RUN cd modules/contrib/login_destination && \
+  wget https://www.drupal.org/files/issues/2018-04-19/login_destination-set-options-on-null-error-2947616-21.patch && \
+  git apply login_destination-set-options-on-null-error-2947616-21.patch && \
+  rm login_destination-set-options-on-null-error-2947616-21.patch
+# Install charts
+#RUN composer require drupal/charts && \
+#  /usr/bin/cd modules/contrib/charts/modules/charts_c3 && \
+#  composer install
 
 # Install field_widget_class
 # field_widget_class may be add business_core module
 # use the command to remove drupal/business_core module
-#RUN composer remove drupal/field_widget_class
+RUN composer remove drupal/field_widget_class
 # Patch: No hook alter to override Field Widget wrappers created by WidgetBase::form
-#RUN cd docroot/ && \
-#  wget https://www.drupal.org/files/issues/2018-06-04/2872162-field-widget-hook-10.patch && \
-#  git apply 2872162-field-widget-hook-10.patch && \
-#  rm 2872162-field-widget-hook-10.patch
+RUN wget https://www.drupal.org/files/issues/2018-06-04/2872162-field-widget-hook-10.patch && \
+  git apply 2872162-field-widget-hook-10.patch && \
+  rm 2872162-field-widget-hook-10.patch
 
 #### Module Patch
 # Patch: PHP Fatal error: Declaration of Drupal\ds\Plugin\views\Entity\Render\TranslationLanguageRenderer::getLangcode(Drupal\views\ResultRow $row) must be compatible with XXXXX
-#RUN cd docroot/modules/contrib/ds && \
-#  wget https://www.drupal.org/files/issues/2018-10-20/3008022-1.patch && \
-#  git apply -v 3008022-1.patch && \
-#  rm 3008022-1.patch
+RUN cd modules/contrib/ds && \
+  wget https://www.drupal.org/files/issues/2018-10-20/3008022-1.patch && \
+  git apply -v 3008022-1.patch && \
+  rm 3008022-1.patch
 
 
 # Install Drupal site
-RUN mkdir -p /var/www/drupal/docroot/sites/default/files && \
-  chmod a+rw /var/www/drupal/docroot/sites/default -R && \
-  cp /var/www/drupal/docroot/sites/default/default.settings.php /var/www/drupal/docroot/sites/default/settings.php && \
-  cp /var/www/drupal/docroot/sites/default/default.services.yml /var/www/drupal/docroot/sites/default/services.yml && \
-  chmod a+rw /var/www/drupal/docroot/sites/default/settings.php && \
-  chmod a+rw /var/www/drupal/docroot/sites/default/services.yml && \
+RUN mkdir -p /var/www/drupal/sites/default/files && \
+  chmod a+rw /var/www/drupal/sites/default -R && \
+  cp /var/www/drupal/sites/default/default.settings.php /var/www/drupal/sites/default/settings.php && \
+  cp /var/www/drupal/sites/default/default.services.yml /var/www/drupal/sites/default/services.yml && \
+  chmod a+rw /var/www/drupal/sites/default/settings.php && \
+  chmod a+rw /var/www/drupal/sites/default/services.yml && \
   chown -R root:root /var/www/drupal/
 
 RUN mkdir -p /var/www/private && \
   chown -R root:root /var/www/private && \
-  echo "\$settings['file_private_path'] = '/var/www/private';" >> /var/www/drupal/docroot/sites/default/settings.php
+  echo "\$settings['file_private_path'] = '/var/www/private';" >> /var/www/drupal/sites/default/settings.php
 
 # Set default work directory
 WORKDIR /var/www
