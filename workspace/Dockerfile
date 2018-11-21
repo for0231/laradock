@@ -892,8 +892,8 @@ RUN git clone -b 8.7.x https://github.com/drupal/drupal.git /var/www/drupal
 ###########################################################################
 # Add Project ISP
 ###########################################################################
-#RUN git clone https://github.com/for0231/isp.git /var/www/drupal/modules/isp
-RUN git clone https://gitee.com/idcp/isp.git /var/www/drupal/modules/isp
+RUN git clone https://github.com/for0231/isp.git /var/www/drupal/modules/isp
+#RUN git clone https://gitee.com/idcp/isp.git /var/www/drupal/modules/isp
 
 WORKDIR /var/www/drupal
 ## Use composer china mirror.
