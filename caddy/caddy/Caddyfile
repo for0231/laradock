@@ -57,7 +57,7 @@ http://drupal.server.host {
 }
 
 http://full.server.host {
-    root /var/www/HTML/full
+    root /var/www/static/full
     index index.html
     # Create a Webhook in git.
     #git {
@@ -70,7 +70,7 @@ http://full.server.host {
 
 }
 http://seed.laradock.demo {
-    root /var/www/HTML/seed
+    root /var/www/static/seed
     index index.html
     # Create a Webhook in git.
     #git {
