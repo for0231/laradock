@@ -57,7 +57,7 @@ http://drupal.server.host {
 }
 
 http://full.server.host {
-    root /var/www/static/full
+    root /var/www/static/full2
     index index.html
     # Create a Webhook in git.
     #git {
